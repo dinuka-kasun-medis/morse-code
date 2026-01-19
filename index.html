@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morse Code Trainer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .target-letter {
+            text-align: center;
+            font-size: 120px;
+            font-weight: bold;
+            color: #764ba2;
+            margin: 30px 0;
+            text-transform: uppercase;
+            min-height: 140px;
+        }
+
+        .morse-display {
+            text-align: center;
+            font-size: 48px;
+            min-height: 70px;
+            margin: 20px 0;
+            font-family: monospace;
+            color: #333;
+            letter-spacing: 10px;
+        }
+
+        .instructions {
+            text-align: center;
+            color: #666;
+            margin: 20px 0;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .feedback {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            min-height: 40px;
+            margin: 20px 0;
+        }
+
+        .feedback.correct {
+            color: #28a745;
+        }
+
+        .feedback.incorrect {
+            color: #dc3545;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .morse-reference {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .morse-reference h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .key-indicator {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 16px;
+            color: #666;
+        }
+
+        .key-visual {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #e9ecef;
+            border-radius: 5px;
+            margin: 10px;
+            font-weight: bold;
+        }
+
+        .key-visual.active {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Morse Code Trainer</h1>
+        
+        <div class="target-letter" id="targetLetter">A</div>
+        
+        <div class="morse-display" id="morseDisplay"></div>
+        
+        <div class="key-indicator">
+            <div class="key-visual" id="keyVisual">SHIFT</div>
+            <div>Hold SHIFT for dash (—), tap for dot (·)</div>
+        </div>
+        
+        <div class="feedback" id="feedback"></div>
+        
+        <div class="instructions">
+            <strong>How to play:</strong><br>
+            Use the SHIFT key to send Morse code.<br>
+            Quick tap = DOT (·) | Long press = DASH (—)<br>
+            Wait briefly after each letter to submit.
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-label">Correct</div>
+                <div class="stat-value" id="correctCount">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Attempts</div>
+                <div class="stat-value" id="attemptCount">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Accuracy</div>
+                <div class="stat-value" id="accuracy">0%</div>
+            </div>
+        </div>
+        
+        <button class="button" onclick="resetGame()">New Letter</button>
+        
+        <div class="morse-reference">
+            <h3>Morse Code Reference:</h3>
+            A: ·— | B: —··· | C: —·—· | D: —·· | E: · | F: ··—· | G: ——· | H: ···· | I: ·· | J: ·——— | K: —·— | L: ·—·· | M: —— | N: —· | O: ——— | P: ·——· | Q: ——·— | R: ·—· | S: ··· | T: — | U: ··— | V: ···— | W: ·—— | X: —··— | Y: —·—— | Z: ——··
+        </div>
+    </div>
+
+    <script>
+        const morseCode = {
+            'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+            'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+            'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+            'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+            'Y': '-.--', 'Z': '--..'
+        };
+
+        let currentLetter = '';
+        let userInput = '';
+        let keyDownTime = 0;
+        let correctCount = 0;
+        let attemptCount = 0;
+        let submitTimer = null;
+        let audioContext = null;
+        let oscillator = null;
+
+        // Initialize audio context
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Play morse tone
+        function playTone(duration) {
+            initAudio();
+            
+            oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 600; // 600 Hz tone
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration / 1000);
+        }
+
+        // Stop tone
+        function stopTone() {
+            if (oscillator) {
+                oscillator = null;
+            }
+        }
+
+        function getRandomLetter() {
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            return letters[Math.floor(Math.random() * letters.length)];
+        }
+
+        function resetGame() {
+            currentLetter = getRandomLetter();
+            userInput = '';
+            document.getElementById('targetLetter').textContent = currentLetter;
+            document.getElementById('morseDisplay').textContent = '';
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').className = 'feedback';
+            clearTimeout(submitTimer);
+        }
+
+        function updateStats() {
+            document.getElementById('correctCount').textContent = correctCount;
+            document.getElementById('attemptCount').textContent = attemptCount;
+            const acc = attemptCount > 0 ? Math.round((correctCount / attemptCount) * 100) : 0;
+            document.getElementById('accuracy').textContent = acc + '%';
+        }
+
+        function checkAnswer() {
+            const correctMorse = morseCode[currentLetter];
+            const feedback = document.getElementById('feedback');
+            
+            attemptCount++;
+            
+            if (userInput === correctMorse) {
+                correctCount++;
+                feedback.textContent = '✓ Correct! Great job!';
+                feedback.className = 'feedback correct';
+                setTimeout(() => {
+                    resetGame();
+                }, 1500);
+            } else {
+                feedback.textContent = '✗ Try again! Expected: ' + correctMorse.replace(/\./g, '·').replace(/-/g, '—');
+                feedback.className = 'feedback incorrect';
+                userInput = '';
+                document.getElementById('morseDisplay').textContent = '';
+            }
+            
+            updateStats();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Shift' && keyDownTime === 0) {
+                keyDownTime = Date.now();
+                document.getElementById('keyVisual').classList.add('active');
+                clearTimeout(submitTimer);
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'Shift' && keyDownTime > 0) {
+                const duration = Date.now() - keyDownTime;
+                const symbol = duration > 200 ? '-' : '.';
+                const displaySymbol = symbol === '.' ? '·' : '—';
+                
+                // Play appropriate tone duration
+                const toneDuration = symbol === '.' ? 100 : 300;
+                playTone(toneDuration);
+                
+                userInput += symbol;
+                document.getElementById('morseDisplay').textContent += displaySymbol;
+                
+                keyDownTime = 0;
+                document.getElementById('keyVisual').classList.remove('active');
+                
+                // Auto-submit after 1 second of inactivity
+                clearTimeout(submitTimer);
+                submitTimer = setTimeout(() => {
+                    if (userInput.length > 0) {
+                        checkAnswer();
+                    }
+                }, 1000);
+            }
+        });
+
+        // Initialize game
+        resetGame();
+        updateStats();
+    </script>
+</body>
+</html>
