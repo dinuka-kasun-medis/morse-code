@@ -56,7 +56,7 @@ Open `index.html` in a modern web browser
 ## UI
 
 ### iOS App
-![iOS App](MorseCode/util/images/iOS_app.PNG)
+<img src="MorseCode/util/images/iOS_app.PNG" width="300" style="aspect-ratio: 9 / 19.5;">
 
 ### Web App
 ![Web App](MorseCode/util/images/web_app.png)
