@@ -28,6 +28,7 @@ The app presents Morse code sequences and allows you to practice:
 
 ### Web App
 - HTML/CSS/JavaScript
+  [Click here to try web app](https://dinuka-kasun-medis.github.io/morse-code/)
 
 ## Project Structure
 
